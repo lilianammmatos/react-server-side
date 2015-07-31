@@ -4,6 +4,7 @@
 var _ = require('underscore');
 var React = require('react');
 var express = require('express');
+var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var port = 4000;
 
@@ -22,6 +23,8 @@ var app = express();
 
 // Instruct express to server up static assets
 app.use(express.static(__dirname + '/public'));
+
+app.use(cookieParser());
 
 // To support JSON-encoded bodies
 app.use(bodyParser.json());
@@ -50,6 +53,7 @@ function _render (req, res, next) {
     var err;
     var type;
     var data;
+    var cookies;
 
     if (req.method !== 'POST') {
         err = 'Method not supported.';
@@ -77,11 +81,13 @@ function _render (req, res, next) {
 
     type = req.params.type;
     dir = comPath + body.dir;
+    cookies = req.cookies || {};
 
     try {
         if (type === TYPE_APP) {
             // Fluxible App that fetches data to render React component to string
             data = {
+                cookies : cookies,
                 serverVars : body.data || {}
             };
             app = require(dir);
